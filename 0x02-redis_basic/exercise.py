@@ -7,9 +7,24 @@ import redis
 from typing import Union, Optional, Callable
 
 
+def count_calls(method: Callable) -> Callable:
+    """Counts number of calls"""
+    counts = {}
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """Wrapper function"""
+        key = method.__qualname__
+        self._redis.incr(key)
+        return method(self, *args, **kwargs)
+
+    return wrapper
+
+
 class Cache:
     """Cache class for Redis"""
 
+    @count_calls
     def __init__(self):
         """Init method"""
         self._redis = redis.Redis()
@@ -36,17 +51,3 @@ class Cache:
     def get_int(self, key: str) -> Union[int, None]:
         """get int function"""
         return self.get(key, fn=int)
-
-
-def count_calls(method: Callable) -> Callable:
-    """Counts number of calls"""
-    counts = {}
-
-    @wraps(method)
-    def wrapper(self, *args, **kwargs):
-        """Wrapper function"""
-        key = method.__qualname__
-        self._redis.incr(key)
-        return method(self, *args, **kwargs)
-
-    return wrapper
