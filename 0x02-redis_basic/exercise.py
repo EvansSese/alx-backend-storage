@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """Redis basics"""
 import uuid
+from functools import wraps
+
 import redis
 from typing import Union, Optional, Callable
 
 
 class Cache:
     """Cache class for Redis"""
+
     def __init__(self):
         """Init method"""
         self._redis = redis.Redis()
@@ -33,3 +36,18 @@ class Cache:
     def get_int(self, key: str) -> Union[int, None]:
         """get int function"""
         return self.get(key, fn=int)
+
+
+def count_calls(method: Callable) -> Callable:
+    """Counts number of calls"""
+    counts = {}
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """Wrapper function"""
+        key = method.__qualname__
+        counts[key] = counts.get(key, 0) + 1
+        result = method(self, *args, **kwargs)
+        return result
+
+    return wrapper
