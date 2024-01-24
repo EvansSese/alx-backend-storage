@@ -24,12 +24,12 @@ def count_calls(method: Callable) -> Callable:
 class Cache:
     """Cache class for Redis"""
 
-    @count_calls
     def __init__(self):
         """Init method"""
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """Takes data argument and returns a string"""
         key = str(uuid.uuid4())
